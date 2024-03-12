@@ -25,7 +25,6 @@ app.use(express.json())
 
 app.use(cookieParser())
 
-// Serve static files from the 'public' directory
 app.use('/', express.static(path.join(__dirname, 'public')))
 
 app.use('/stripe', stripe)
@@ -37,10 +36,16 @@ app.use('/notes', require('./routes/noteRoutes'))
 app.use('/cars', require('./routes/carRoutes'))
 app.use('/reservation', require('./routes/reservationRoutes'))
 
-// Fallback route for handling client-side routing
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+app.all('*', (req, res) => {
+    res.status(404)
+    if (req.accepts('html')) {
+        res.sendFile(path.join(__dirname, 'views', '404.html'))
+    } else if (req.accepts('json')) {
+        res.json({ message: '404 Not Found' })
+    } else {
+        res.type('txt').send('404 Not Found')
+    }
+})
 
 app.use(errorHandler)
 
